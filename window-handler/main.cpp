@@ -8,6 +8,6 @@ int main()
 
     handler.main();
 
-    system("PAUSE");
+    // system("PAUSE");
     return 0;
 }
