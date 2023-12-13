@@ -9,6 +9,7 @@ public:
     windowHandler(RubLogger logger);
 
     void main();
+    void update();
 
 private:
     RubLogger logger;
