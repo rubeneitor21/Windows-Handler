@@ -16,7 +16,6 @@ windowHandler::windowHandler(RubLogger logger) : logger(logger) {}
 
 BOOL CALLBACK windows(HWND hwnd, LPARAM lparam)
 {
-
     if (IsWindowVisible(hwnd))
     {
         TCHAR windowTitle[256];
@@ -124,48 +123,51 @@ bool windowHandler::checkChanges()
 
 void windowHandler::update()
 {
-    if (!checkChanges())
+    while (true)
     {
-        update();
-    }
-    else
-    {
-        int ventanasI = 1;
-        int maxVentanas = ventanas.size();
+        ventanas = {};
+        HDESK desktop = GetThreadDesktop(GetCurrentThreadId());
+        bool completado = EnumDesktopWindows(desktop, windows, 0);
 
-        INFO(logger, std::to_string(maxVentanas));
-
-        int width = (desktopSize.right / dpiX * 96);
-        int height = desktopSize.bottom + (desktopSize.bottom / dpiY) - 10;
-
-        RECT lastWindow;
-        lastWindow.right = width;
-        lastWindow.bottom = height;
-        lastWindow.left = 0;
-        lastWindow.top = 0;
-        HWND lastHandle = NULL;
-
-        for (auto &pair : ventanas)
+        if (checkChanges())
         {
-            if (ventanasI > 4)
+
+            int ventanasI = 1;
+            int maxVentanas = ventanas.size();
+
+            INFO(logger, std::to_string(maxVentanas));
+
+            int width = (desktopSize.right / dpiX * 96);
+            int height = desktopSize.bottom + (desktopSize.bottom / dpiY) - 10;
+
+            RECT lastWindow;
+            lastWindow.right = width;
+            lastWindow.bottom = height;
+            lastWindow.left = 0;
+            lastWindow.top = 0;
+            HWND lastHandle = NULL;
+
+            for (auto &pair : ventanas)
             {
-                ShowWindow(pair.first, SW_MINIMIZE);
-                continue;
+                if (ventanasI > 4)
+                {
+                    ShowWindow(pair.first, SW_MINIMIZE);
+                    continue;
+                }
+                RECT nuevaVentana;
+                INFO(logger, std::to_string(lastWindow.left) + " " + std::to_string(lastWindow.top) + " " + std::to_string(lastWindow.right) + " " + std::to_string(lastWindow.bottom) + " ");
+
+                windowSize(lastWindow, ventanasI, lastHandle, ventanasI % 2 != 0, nuevaVentana);
+
+                INFO(logger, std::to_string(nuevaVentana.left) + " " + std::to_string(nuevaVentana.top) + " " + std::to_string(nuevaVentana.right) + " " + std::to_string(nuevaVentana.bottom) + " ");
+
+                ShowWindow(pair.first, SW_NORMAL);
+                SetWindowPos(pair.first, 0, nuevaVentana.left, nuevaVentana.top, nuevaVentana.right, nuevaVentana.bottom, 0);
+                lastHandle = pair.first;
+                ventanasI++;
             }
-            RECT nuevaVentana;
-            INFO(logger, std::to_string(lastWindow.left) + " " + std::to_string(lastWindow.top) + " " + std::to_string(lastWindow.right) + " " + std::to_string(lastWindow.bottom) + " ");
-
-            windowSize(lastWindow, ventanasI, lastHandle, ventanasI % 2 != 0, nuevaVentana);
-
-            INFO(logger, std::to_string(nuevaVentana.left) + " " + std::to_string(nuevaVentana.top) + " " + std::to_string(nuevaVentana.right) + " " + std::to_string(nuevaVentana.bottom) + " ");
-
-            ShowWindow(pair.first, SW_NORMAL);
-            SetWindowPos(pair.first, 0, nuevaVentana.left, nuevaVentana.top, nuevaVentana.right, nuevaVentana.bottom, 0);
-            lastHandle = pair.first;
-            ventanasI++;
         }
     }
-    update();
 }
 
 // if (maxVentanas == 2)
