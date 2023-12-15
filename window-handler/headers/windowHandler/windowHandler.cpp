@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <map>
 #include <string.h>
+#include <thread>
 
 std::map<HWND, std::string> ventanas = {};
 RECT desktopSize;
@@ -62,53 +63,129 @@ void windowHandler::main()
     }
 }
 
-RECT windowHandler::windowSize(RECT lastWindow, RECT pos, HWND &handler, bool xSeparator)
+void windowHandler::windowSize(RECT &lastWindow, int i, HWND handler, bool xSeparator, RECT &returnValue)
 {
-    RECT window;
-
     // WARN: restructurar esto que va a tener fallitos seguro
-    window.left = lastWindow.left;
-    window.right = lastWindow.right / (xSeparator ? 2 : 1);
+    if (!xSeparator)
+    {
+        returnValue.left = lastWindow.right / 2 + lastWindow.left / (2 * i) * 8.2;
+        returnValue.right = lastWindow.right / 2;
 
-    window.top = lastWindow.top;
-    window.bottom = lastWindow.bottom / (xSeparator ? 1 : 2);
+        returnValue.top = lastWindow.top;
+        returnValue.bottom = lastWindow.bottom;
+    }
+    else
+    {
+        returnValue.left = lastWindow.left;
+        returnValue.right = lastWindow.right;
 
-    return window;
+        returnValue.top = lastWindow.bottom / 2 + lastWindow.top / (2 * i);
+        returnValue.bottom = lastWindow.bottom / 2;
+    }
+
+    // RECT newLast;
+    // newLast.left = lastWindow.left;
+    // newLast.right = lastWindow.right / 2;
+
+    // // Cambiar esto si funciona luego
+    // newLast.top = lastWindow.top;
+    // newLast.bottom = lastWindow.bottom;
+
+    if (handler != NULL)
+    {
+        ShowWindow(handler, SW_NORMAL);
+        auto r = SetWindowPos(handler, 0, lastWindow.left, lastWindow.top, lastWindow.right / (!xSeparator ? 2 : 1), lastWindow.bottom / (xSeparator ? 2 : 1), 0);
+        lastWindow.left = returnValue.left;
+        lastWindow.right = returnValue.right;
+        lastWindow.top = returnValue.top;
+        lastWindow.bottom = returnValue.bottom;
+    }
+}
+
+std::map<HWND, std::string> control = {};
+bool windowHandler::checkChanges()
+{
+    if (control.size() != ventanas.size())
+    {
+        control = ventanas;
+        return true;
+    }
+    for (auto &pair : ventanas)
+    {
+        auto it = control.find(pair.first);
+        if (it == control.end())
+        {
+            return true;
+        }
+    }
+    return false;
+    control = ventanas;
 }
 
 void windowHandler::update()
 {
-    int ventanasI = 0;
-    int maxVentanas = ventanas.size();
-
-    INFO(logger, std::to_string(maxVentanas));
-
-    int width = (desktopSize.right / dpiX * 96);
-    int height = desktopSize.bottom + (desktopSize.bottom / dpiY) - 10;
-
-    for (auto &pair : ventanas)
+    if (!checkChanges())
     {
-        if (maxVentanas == 2)
+        update();
+    }
+    else
+    {
+        int ventanasI = 1;
+        int maxVentanas = ventanas.size();
+
+        INFO(logger, std::to_string(maxVentanas));
+
+        int width = (desktopSize.right / dpiX * 96);
+        int height = desktopSize.bottom + (desktopSize.bottom / dpiY) - 10;
+
+        RECT lastWindow;
+        lastWindow.right = width;
+        lastWindow.bottom = height;
+        lastWindow.left = 0;
+        lastWindow.top = 0;
+        HWND lastHandle = NULL;
+
+        for (auto &pair : ventanas)
         {
-            ShowWindow(pair.first, SW_NORMAL);
-            auto r = SetWindowPos(pair.first, 0, width / 2 * ventanasI, 0, width / 2, height, 0);
-            ventanasI++;
-        }
-        else if (maxVentanas > 2)
-        {
-            if (ventanasI >= 4)
+            if (ventanasI > 4)
             {
                 ShowWindow(pair.first, SW_MINIMIZE);
+                continue;
             }
-            else
-            {
-                int posX = ventanasI % 2 == 0 ? 0 : width / 2;
-                int posY = ventanasI < 2 ? 0 : height / 2;
-                ShowWindow(pair.first, SW_NORMAL);
-                auto r = SetWindowPos(pair.first, 0, posX, posY, width / 2, height / 2, 0);
-                ventanasI++;
-            }
+            RECT nuevaVentana;
+            INFO(logger, std::to_string(lastWindow.left) + " " + std::to_string(lastWindow.top) + " " + std::to_string(lastWindow.right) + " " + std::to_string(lastWindow.bottom) + " ");
+
+            windowSize(lastWindow, ventanasI, lastHandle, ventanasI % 2 != 0, nuevaVentana);
+
+            INFO(logger, std::to_string(nuevaVentana.left) + " " + std::to_string(nuevaVentana.top) + " " + std::to_string(nuevaVentana.right) + " " + std::to_string(nuevaVentana.bottom) + " ");
+
+            ShowWindow(pair.first, SW_NORMAL);
+            SetWindowPos(pair.first, 0, nuevaVentana.left, nuevaVentana.top, nuevaVentana.right, nuevaVentana.bottom, 0);
+            lastHandle = pair.first;
+            ventanasI++;
         }
-        // INFO(logger, std::to_string(r));
     }
+    update();
 }
+
+// if (maxVentanas == 2)
+//         {
+//             ShowWindow(pair.first, SW_NORMAL);
+//             auto r = SetWindowPos(pair.first, 0, width / 2 * ventanasI, 0, width / 2, height, 0);
+//             ventanasI++;
+//         }
+//         else if (maxVentanas > 2)
+//         {
+//             if (ventanasI >= 4)
+//             {
+//                 ShowWindow(pair.first, SW_MINIMIZE);
+//             }
+//             else
+//             {
+//                 int posX = ventanasI % 2 == 0 ? 0 : width / 2;
+//                 int posY = ventanasI < 2 ? 0 : height / 2;
+//                 ShowWindow(pair.first, SW_NORMAL);
+//                 auto r = SetWindowPos(pair.first, 0, posX, posY, width / 2, height / 2, 0);
+//                 ventanasI++;
+//             }
+//         }

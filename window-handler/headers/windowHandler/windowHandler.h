@@ -1,4 +1,5 @@
 #include "../rubLogger/rubLogger.h"
+#include "windows.h"
 
 #ifndef windowHandler_h
 #define windowHandler_h
@@ -10,7 +11,8 @@ public:
 
     void main();
     void update();
-    RECT windowSize(RECT lastWindow, RECT pos, HWND &handler, bool xSeparator);
+    void windowSize(RECT &lastWindow, int i, HWND handler, bool xSeparator, RECT &returnValue);
+    bool checkChanges();
 
 private:
     RubLogger logger;
