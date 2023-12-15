@@ -62,6 +62,20 @@ void windowHandler::main()
     }
 }
 
+RECT windowHandler::windowSize(RECT lastWindow, RECT pos, HWND &handler, bool xSeparator)
+{
+    RECT window;
+
+    // WARN: restructurar esto que va a tener fallitos seguro
+    window.left = lastWindow.left;
+    window.right = lastWindow.right / (xSeparator ? 2 : 1);
+
+    window.top = lastWindow.top;
+    window.bottom = lastWindow.bottom / (xSeparator ? 1 : 2);
+
+    return window;
+}
+
 void windowHandler::update()
 {
     int ventanasI = 0;

@@ -10,6 +10,7 @@ public:
 
     void main();
     void update();
+    RECT windowSize(RECT lastWindow, RECT pos, HWND &handler, bool xSeparator);
 
 private:
     RubLogger logger;
