@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/rugar/OneDrive/Documents/GitHub/Windows-Handler/window-handler",
-      "program": "c:/Users/rugar/OneDrive/Documents/GitHub/Windows-Handler/window-handler/build/Debug/outDebug",
+      "cwd": "c:/Users/rugar/OneDrive/Documents/GitHub/Windows-Handler/window-handler/headers/windowHandler",
+      "program": "c:/Users/rugar/OneDrive/Documents/GitHub/Windows-Handler/window-handler/headers/windowHandler/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
