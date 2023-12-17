@@ -67,7 +67,9 @@
     "numeric": "cpp",
     "random": "cpp",
     "string_view": "cpp",
-    "numbers": "cpp"
+    "numbers": "cpp",
+    "chrono": "cpp",
+    "semaphore": "cpp"
   },
   "C_Cpp_Runner.cCompilerPath": "gcc",
   "C_Cpp_Runner.cppCompilerPath": "g++",

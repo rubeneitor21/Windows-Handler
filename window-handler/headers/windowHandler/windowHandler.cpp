@@ -28,6 +28,7 @@ BOOL CALLBACK windows(HWND hwnd, LPARAM lparam)
 
             if (placement.showCmd != SW_HIDE && GetWindowLong(hwnd, GWL_STYLE) > 0)
             {
+                // TODO: Just a couple of exeptions more to handle alt + space and some menus correctly
                 ventanas.insert(std::make_pair(hwnd, (std::string)windowTitle));
             }
         }
@@ -35,6 +36,7 @@ BOOL CALLBACK windows(HWND hwnd, LPARAM lparam)
     return true;
 }
 
+//* This actually looks good
 void windowHandler::main()
 {
     INFO(logger, "Starting service...");
@@ -57,17 +59,19 @@ void windowHandler::main()
         {
             INFO(logger, pair.second);
         }
-        update();
+
+        std::thread update_thread(windowHandler::update, this);
+        update_thread.join();
         INFO(logger, "Started\n");
     }
 }
 
+// TODO: A little rework would be nice to. Better order of params
 void windowHandler::windowSize(RECT &lastWindow, int i, HWND handler, bool xSeparator, RECT &returnValue)
 {
-    // WARN: restructurar esto que va a tener fallitos seguro
     if (!xSeparator)
     {
-        returnValue.left = lastWindow.right / 2 + lastWindow.left / (2 * i) * 8.2;
+        returnValue.left = lastWindow.right / 2 + lastWindow.left / (2 * i) * 8.2; // This feels wrong
         returnValue.right = lastWindow.right / 2;
 
         returnValue.top = lastWindow.top;
@@ -82,14 +86,7 @@ void windowHandler::windowSize(RECT &lastWindow, int i, HWND handler, bool xSepa
         returnValue.bottom = lastWindow.bottom / 2;
     }
 
-    // RECT newLast;
-    // newLast.left = lastWindow.left;
-    // newLast.right = lastWindow.right / 2;
-
-    // // Cambiar esto si funciona luego
-    // newLast.top = lastWindow.top;
-    // newLast.bottom = lastWindow.bottom;
-
+    //? Should change this?
     if (handler != NULL)
     {
         ShowWindow(handler, SW_NORMAL);
@@ -101,6 +98,8 @@ void windowHandler::windowSize(RECT &lastWindow, int i, HWND handler, bool xSepa
     }
 }
 
+//* Works great, but should return the diff hwnd for the refresh
+//* windows go like crazy when updating position
 std::map<HWND, std::string> control = {};
 bool windowHandler::checkChanges()
 {
@@ -121,6 +120,7 @@ bool windowHandler::checkChanges()
     control = ventanas;
 }
 
+// TODO: This needs to be re-done to add conditional reloading, just for not reloading the whole thing
 void windowHandler::update()
 {
     while (true)
@@ -137,6 +137,7 @@ void windowHandler::update()
 
             INFO(logger, std::to_string(maxVentanas));
 
+            //? Something might be off
             int width = (desktopSize.right / dpiX * 96);
             int height = desktopSize.bottom + (desktopSize.bottom / dpiY) - 10;
 
@@ -145,6 +146,7 @@ void windowHandler::update()
             lastWindow.bottom = height;
             lastWindow.left = 0;
             lastWindow.top = 0;
+
             HWND lastHandle = NULL;
 
             for (auto &pair : ventanas)
@@ -155,11 +157,11 @@ void windowHandler::update()
                     continue;
                 }
                 RECT nuevaVentana;
-                INFO(logger, std::to_string(lastWindow.left) + " " + std::to_string(lastWindow.top) + " " + std::to_string(lastWindow.right) + " " + std::to_string(lastWindow.bottom) + " ");
+                INFO(logger, "LastWindow: " + std::to_string(lastWindow.left) + " " + std::to_string(lastWindow.top) + " " + std::to_string(lastWindow.right) + " " + std::to_string(lastWindow.bottom) + " ");
 
                 windowSize(lastWindow, ventanasI, lastHandle, ventanasI % 2 != 0, nuevaVentana);
 
-                INFO(logger, std::to_string(nuevaVentana.left) + " " + std::to_string(nuevaVentana.top) + " " + std::to_string(nuevaVentana.right) + " " + std::to_string(nuevaVentana.bottom) + " ");
+                INFO(logger, "NewWindow " + std::to_string(nuevaVentana.left) + " " + std::to_string(nuevaVentana.top) + " " + std::to_string(nuevaVentana.right) + " " + std::to_string(nuevaVentana.bottom) + " ");
 
                 ShowWindow(pair.first, SW_NORMAL);
                 SetWindowPos(pair.first, 0, nuevaVentana.left, nuevaVentana.top, nuevaVentana.right, nuevaVentana.bottom, 0);
@@ -167,27 +169,6 @@ void windowHandler::update()
                 ventanasI++;
             }
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
-
-// if (maxVentanas == 2)
-//         {
-//             ShowWindow(pair.first, SW_NORMAL);
-//             auto r = SetWindowPos(pair.first, 0, width / 2 * ventanasI, 0, width / 2, height, 0);
-//             ventanasI++;
-//         }
-//         else if (maxVentanas > 2)
-//         {
-//             if (ventanasI >= 4)
-//             {
-//                 ShowWindow(pair.first, SW_MINIMIZE);
-//             }
-//             else
-//             {
-//                 int posX = ventanasI % 2 == 0 ? 0 : width / 2;
-//                 int posY = ventanasI < 2 ? 0 : height / 2;
-//                 ShowWindow(pair.first, SW_NORMAL);
-//                 auto r = SetWindowPos(pair.first, 0, posX, posY, width / 2, height / 2, 0);
-//                 ventanasI++;
-//             }
-//         }
