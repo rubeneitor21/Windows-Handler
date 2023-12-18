@@ -16,7 +16,7 @@ windowHandler::windowHandler(RubLogger logger) : logger(logger) {}
 
 BOOL CALLBACK windows(HWND hwnd, LPARAM lparam)
 {
-    if (IsWindowVisible(hwnd))
+    if (IsWindowVisible(hwnd) && MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY) != nullptr)
     {
         TCHAR windowTitle[256];
         if (GetWindowText(hwnd, windowTitle, sizeof(windowTitle) / sizeof(windowTitle[0])) > 0)
