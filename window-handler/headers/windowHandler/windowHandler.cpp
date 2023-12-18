@@ -28,8 +28,9 @@ BOOL CALLBACK windows(HWND hwnd, LPARAM lparam)
 
             if (placement.showCmd != SW_HIDE && GetWindowLong(hwnd, GWL_STYLE) > 0)
             {
-                // TODO: Just a couple of exeptions more to handle alt + space and some menus correctly
-                ventanas.insert(std::make_pair(hwnd, (std::string)windowTitle));
+                if ((GetWindowLong(hwnd, GWL_STYLE) & WS_POPUPWINDOW) && !(GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_TOPMOST))
+                    // TODO: Just a couple of exeptions more to handle alt + space and some menus correctly
+                    ventanas.insert(std::make_pair(hwnd, (std::string)windowTitle));
             }
         }
     }
@@ -99,7 +100,7 @@ void windowHandler::windowSize(RECT &lastWindow, int i, HWND handler, bool xSepa
 }
 
 //* Works great, but should return the diff hwnd for the refresh
-//* windows go like crazy when updating position
+//* windows goes like crazy when updating position
 std::map<HWND, std::string> control = {};
 bool windowHandler::checkChanges()
 {
