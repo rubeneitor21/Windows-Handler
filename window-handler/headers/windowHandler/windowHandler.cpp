@@ -154,6 +154,11 @@ void windowHandler::update()
 
             for (auto &pair : ventanas)
             {
+                if (maxVentanas == 1)
+                {
+                    ShowWindow(pair.first, SW_MAXIMIZE);
+                    continue;
+                }
                 if (ventanasI > 4)
                 {
                     ShowWindow(pair.first, SW_MINIMIZE);
