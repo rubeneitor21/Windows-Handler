@@ -26,11 +26,14 @@ BOOL CALLBACK windows(HWND hwnd, LPARAM lparam)
             placement.length = sizeof(WINDOWPLACEMENT);
             GetWindowPlacement(hwnd, &placement);
 
-            if (placement.showCmd != SW_HIDE && GetWindowLong(hwnd, GWL_STYLE) > 0)
+            int style = GetWindowLong(hwnd, GWL_STYLE);
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+
+            if (placement.showCmd != SW_HIDE && style > 0)
             {
-                if ((GetWindowLong(hwnd, GWL_STYLE) & WS_POPUPWINDOW) &&
-                    !(GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_TOPMOST) &&
-                    !(placement.showCmd != SW_SHOWMAXIMIZED && GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_APPWINDOW))
+                if ((style & WS_POPUPWINDOW) &&
+                    !(exStyle & WS_EX_TOPMOST) &&
+                    !(placement.showCmd != SW_SHOWMAXIMIZED && exStyle & WS_EX_APPWINDOW))
                     // TODO: Just a couple of exeptions more to handle alt + space and some menus correctly
                     ventanas.insert(std::make_pair(hwnd, (std::string)windowTitle));
             }
