@@ -33,7 +33,8 @@ BOOL CALLBACK windows(HWND hwnd, LPARAM lparam)
             {
                 if ((style & WS_POPUPWINDOW) &&
                     !(exStyle & WS_EX_TOPMOST) &&
-                    !(placement.showCmd != SW_SHOWMAXIMIZED && exStyle & WS_EX_APPWINDOW))
+                    !(placement.showCmd != SW_SHOWMAXIMIZED && exStyle & WS_EX_APPWINDOW) &&
+                    !(style & WS_MINIMIZE))
                     // TODO: Just a couple of exeptions more to handle alt + space and some menus correctly
                     ventanas.insert(std::make_pair(hwnd, (std::string)windowTitle));
             }
