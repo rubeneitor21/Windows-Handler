@@ -1,12 +1,24 @@
 #include "headers/rubLogger/rubLogger.h"
 #include "headers/windowHandler/windowHandler.h"
+#include "headers/updater/update.h"
 
 int main()
 {
     RubLogger logger;
     windowHandler handler = windowHandler(logger);
+    Updater updater = Updater(logger);
 
-    handler.main();
+    bool updateAvailable = updater.update();
+
+    if (updateAvailable)
+    {
+        system("start .\\update.bat");
+        return 0;
+    }
+    else
+    {
+        handler.main();
+    }
 
     return 0;
 }
