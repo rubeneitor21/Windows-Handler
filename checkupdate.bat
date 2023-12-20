@@ -1,6 +1,6 @@
 @echo off
 
-.\PortableGit\bin\git.exe pull > temp.txt
+git pull > temp.txt
 
 set /p "variable=" <temp.txt
 
