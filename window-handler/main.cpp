@@ -12,7 +12,7 @@ int main()
 
     if (updateAvailable)
     {
-        system("start .\\update.bat");
+        system("start powershell .\\update.ps1");
         return 0;
     }
     else
