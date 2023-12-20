@@ -27,6 +27,6 @@
 *.lib
 
 # Executables
-.\*.exe
+RubBs.exe
 *.out
 *.app
