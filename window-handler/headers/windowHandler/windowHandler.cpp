@@ -16,7 +16,7 @@ windowHandler::windowHandler(RubLogger logger) : logger(logger) {}
 
 BOOL CALLBACK windows(HWND hwnd, LPARAM lparam)
 {
-    if (IsWindowVisible(hwnd) && MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY) != nullptr)
+    if (IsWindowVisible(hwnd) && MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY) == MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY))
     {
         TCHAR windowTitle[256];
         if (GetWindowText(hwnd, windowTitle, sizeof(windowTitle) / sizeof(windowTitle[0])) > 0)
@@ -65,6 +65,7 @@ void windowHandler::main()
         for (auto &pair : ventanas)
         {
             INFO(logger, pair.second);
+            std::cout << "ptr: " << MonitorFromWindow(pair.first, MONITOR_DEFAULTTOPRIMARY) << std::endl;
         }
 
         std::thread update_thread(windowHandler::update, this);
